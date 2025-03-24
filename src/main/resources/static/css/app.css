@@ -1,0 +1,207 @@
+* {
+    border: 0px;
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+}
+html, body {
+    height: 100%; /* Ensure the body and html elements take up the full viewport height */
+}
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100%; 
+}
+.content {
+    padding: 2rem;
+}
+.nav {
+    display: flex;
+    flex-direction: row;
+    padding: 2rem;
+    justify-content: center;
+    justify-items: center;
+    border: 2px solid black;
+    background-color: black;
+}
+.nav-items {
+    display: flex;
+    flex-direction: row;
+    column-gap: 2rem;
+}
+.nav-item {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+}
+.nav-item:hover {
+    transform: scale(1.1);
+    text-decoration: underline;
+}
+.footer {
+    display: flex;
+    flex-direction: row;
+    padding: 2rem;
+    justify-content: center;
+    justify-items: center;
+    border: 2px solid black;
+    background-color: black;
+    width: 100%;
+    align-self: flex-end;
+}
+.heading {
+    font-size: 3rem;
+    font-weight: 900;
+}
+.header {
+    display: flex;
+    flex-direction: row;
+    padding: 2rem;
+    justify-content: center;
+    justify-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.sub-heading-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+}
+button {
+    display: flex;
+    flex-direction: row;
+    padding: 10px 15px;
+    font-size: medium;
+    background-color: black;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-radius: 0.4rem;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+}
+.image-heading{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.image-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 1.5rem;
+    gap: 1rem;
+    justify-content: start;
+    justify-items: center;
+    align-items: center;
+}
+.image-item {
+    border-radius: 0.4rem;
+    width: 30%;
+    border: 2px solid black;
+    height: 20rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    object-fit: cover;
+    object-position: center;
+    flex-direction: column;
+    position: relative;
+}
+.delete {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: red;
+    color: white;
+}
+a {
+    text-decoration: none;
+}
+.pagination {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+    gap: 1rem;
+    padding: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1rem;
+}
+.pagination-container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: rgb(212, 212, 212);
+    border-radius: 0.4rem;
+}
+.pagination-button a {
+    text-decoration: none;
+    color: black;
+    font-weight: 400;
+}
+.pagination-page a {
+    text-decoration: none;
+    color: black;
+    font-weight: 400;
+}
+.form-container {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    border: 2px solid black;
+    gap: 1rem;
+    justify-content: center;
+    justify-items: center;
+}
+.alert {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    background-color: green;
+    color: #fff;
+    padding: 1rem;
+    border-radius: 0.4rem;
+}
+.mb {
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    display: block;
+    color: #333;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fafafa;
+    font-size: 1em;
+    color: #333;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fafafa;
+    font-size: 1em;
+    color: #333;
+}
+
+input[type="file"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+.image {
+    flex-grow: 0;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0.4rem;
+}

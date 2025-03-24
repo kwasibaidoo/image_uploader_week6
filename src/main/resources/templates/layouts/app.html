@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/app.css">
+    <title>Image Storage</title>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-items">
+            <a href="/">
+                <div class="nav-item">Home</div>
+            </a>
+            <a href="/upload">
+                <div class="nav-item">Upload Image</div>
+            </a>
+        </div>
+    </nav>
+    <header class="header">
+        <h1 class="heading">
+            Image Storage
+        </h1>
+    </header>
+
+    <div>
+        <section class="content" layout:fragment="content">
+            <!-- This will be replaced by content in child templates -->
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>Footer Content</p>
+    </footer>
+</body>
+</html>

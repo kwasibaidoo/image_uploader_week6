@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/app.html}">
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <section layout:fragment="content">
+        <div th:if="${message}" class="alert alert-danger" role="alert">
+            <p th:text="${message}"></p>
+        </div>
+        <div class="sub-heading-container">
+            <h3 class="image-heading">Your Images</h3>
+            <button class="button" onclick="window.location.reload();">
+                Refresh
+            </button>
+        </div>
+        <div class="image-container">
+            <!-- Using 'images' directly since we're passing content from the controller -->
+            <div th:each="image : ${images}" class="image-item">
+                <img class="image" th:src="${image}" alt="Image">
+                <form action="/delete" method="post">
+                    <input type="hidden" name="id" th:value="${image}">
+                    <button class="delete">Delete</button>
+                </form>
+            </div>
+            <!-- Show a message if no images are found -->
+            <div th:if="${#lists.isEmpty(images)}" class="no-images">
+                <p>No images found. Try uploading some images first.</p>
+            </div>
+        </div>
+        <div class="pagination" th:if="${totalPages > 1}">
+            <div class="pagination-container">
+                <span class="pagination-button" th:if="${currentPage > 0}">
+                    <a th:href="@{/(page=${currentPage - 1}, size=${pageSize})}">Previous</a>
+                </span>
+                
+                <span class="pagination-page" th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/(page=${i}, size=${pageSize})}" 
+                       th:text="${i + 1}"
+                       th:class="${currentPage == i ? 'active' : ''}"></a>
+                </span>
+                
+                <span class="pagination-number" th:if="${hasNextPage}">
+                    <a th:href="@{/(page=${currentPage + 1}, size=${pageSize})}">Next</a>
+                </span>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
