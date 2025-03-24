@@ -102,18 +102,28 @@ public class ImageService {
         Page<Image> imagePage = imageRepository.findAll(pageable);
         
         // Extract the image URLs from the database
-        List<String> imageUrls = imagePage.getContent().stream()
-                .map(Image::getImageUrl)  // Assuming the method getImageUrl() fetches the S3 URL from the database
-                .collect(Collectors.toList());
+        // List<String> imageUrls = imagePage.getContent().stream()
+        //         .map(Image::getImageUrl)  // Assuming the method getImageUrl() fetches the S3 URL from the database
+        //         .collect(Collectors.toList());
         
-        // Generate presigned URLs if necessary (for private images)
-        List<String> presignedUrls = imageUrls.stream()
-                .map(this::generatePresignedUrl)
-                .collect(Collectors.toList());
+        // // Generate presigned URLs if necessary (for private images)
+        // List<String> presignedUrls = imageUrls.stream()
+        //         .map(this::generatePresignedUrl)
+        //         .collect(Collectors.toList());
+
+        List<Map<String, String>> imageDetails = imagePage.getContent().stream()
+            .map(image -> {
+                Map<String, String> imageDetail = new HashMap<>();
+                String presignedUrl = generatePresignedUrl(image.getImageUrl());  // Generate presigned URL for private images
+                imageDetail.put("url", presignedUrl);
+                imageDetail.put("description", image.getImageDescription());  // Assuming the method getImageDescription() fetches the description from the database
+                return imageDetail;
+            })
+            .collect(Collectors.toList());
 
         
         // Store pagination details
-        result.put("images", presignedUrls);  // Return the presigned URLs instead of raw S3 URLs
+        result.put("images", imageDetails);  // Return the presigned URLs instead of raw S3 URLs
         result.put("currentPage", page);
         result.put("totalPages", imagePage.getTotalPages());
         result.put("hasNextPage", imagePage.hasNext());

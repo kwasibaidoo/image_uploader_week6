@@ -17,7 +17,8 @@
         <div class="image-container">
             <!-- Using 'images' directly since we're passing content from the controller -->
             <div th:each="image : ${images}" class="image-item">
-                <img class="image" th:src="${image}" alt="Image">
+                <img class="image" th:src="${image.url}" alt="Image">
+                <p class="image-description" th:text="${image.description}"></p>
                 <form action="/delete" method="post">
                     <input type="hidden" name="id" th:value="${image}">
                     <button class="delete">Delete</button>

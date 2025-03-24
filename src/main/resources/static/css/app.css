@@ -99,7 +99,7 @@ button {
     border-radius: 0.4rem;
     width: 30%;
     border: 2px solid black;
-    height: 20rem;
+    height: 30rem;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -114,6 +114,13 @@ button {
     left: 0;
     background-color: red;
     color: white;
+}
+.image-description {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: white;
+    color: black;
 }
 a {
     text-decoration: none;
