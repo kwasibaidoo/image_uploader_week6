@@ -41,7 +41,7 @@ public class ImageService {
     @Autowired
     private ImageRepository imageRepository;
 
-    private String BUCKET_NAME = "week6imageuploaderbucket";
+    private String BUCKET_NAME = "weeksixproject-images-888577022995";
     // private String BUCKET_NAME = "week5labbucketimageuploader";
 
     
