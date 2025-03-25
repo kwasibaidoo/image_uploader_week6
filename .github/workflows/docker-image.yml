@@ -93,7 +93,8 @@ jobs:
     #           },
     #           "environment": [
     #             {"name": "S3_BUCKET_NAME", "value": "${{ env.APP_ENVIRONMENT }}-images-${{ secrets.AWS_ACCOUNT_ID }}"},
-    #             {"name": "AWS_REGION", "value": "${{ env.AWS_REGION }}"}
+    #             {"name": "AWS_REGION", "value": "${{ env.AWS_REGION }}"},
+    #             {"name": "SPRING_ACTIVE_PROFILE", "value": "prod"}
     #           ],
     #           "healthCheck": {
     #             "command": ["CMD-SHELL", "curl -f http://localhost:5000/ || exit 1"],
