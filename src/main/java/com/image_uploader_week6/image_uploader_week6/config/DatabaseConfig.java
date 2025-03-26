@@ -41,21 +41,6 @@ public class DatabaseConfig {
         String username = secretJson.getString("username");
         String password = secretJson.getString("password");
 
-        // Get actual password
-        SecretsManagerClient secretsManagerClienttwo = SecretsManagerClient.builder().region(Region.of("eu-west-1")).build();
-        GetSecretValueRequest getSecretValueRequesttwo = GetSecretValueRequest.builder().secretId(password).build();
-        GetSecretValueResponse getSecretValueResponsetwo;
-
-        try {
-            getSecretValueResponsetwo = secretsManagerClienttwo.getSecretValue(getSecretValueRequesttwo);
-        } catch (Exception e) {
-            throw e;
-        }
-
-        String rdsSecret = getSecretValueResponsetwo.secretString();
-        JSONObject rdJsonObject = new JSONObject(rdsSecret);
-        String actualpassword = rdJsonObject.getString("password");
-
 
         
         String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", host, port, dbname);
@@ -63,7 +48,7 @@ public class DatabaseConfig {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl(jdbcUrl);
         hikariConfig.setUsername(username);
-        hikariConfig.setPassword(actualpassword);
+        hikariConfig.setPassword(password);
 
         hikariConfig.setConnectionTimeout(60000);  // 30 seconds
         hikariConfig.setValidationTimeout(60000);   // 5 seconds
@@ -77,25 +62,4 @@ public class DatabaseConfig {
         return new HikariDataSource(hikariConfig);
 
     }
-
-    // @Bean
-    // @Profile("github-actions")  // Apply this bean only if the 'github-actions' profile is active
-    // public DataSource githubActionsDataSource() {
-    //     // For GitHub Actions, use an in-memory database (e.g., H2 or a mock database)
-    //     HikariConfig hikariConfig = new HikariConfig();
-    //     hikariConfig.setJdbcUrl("jdbc:h2:mem:testdb");  // Use in-memory database during GitHub Actions
-    //     hikariConfig.setUsername("sa");
-    //     hikariConfig.setPassword("password");
-        
-    //     hikariConfig.setConnectionTimeout(60000);
-    //     hikariConfig.setValidationTimeout(60000);
-    //     hikariConfig.setIdleTimeout(60000);
-    //     hikariConfig.setMaxLifetime(2000000);
-    //     hikariConfig.setMaximumPoolSize(10);
-    //     hikariConfig.setMinimumIdle(5);
-    //     hikariConfig.setConnectionTestQuery("SELECT 1");
-    //     hikariConfig.setPoolName("H2ConnectionPool");
-
-    //     return new HikariDataSource(hikariConfig);
-    // }
 }
