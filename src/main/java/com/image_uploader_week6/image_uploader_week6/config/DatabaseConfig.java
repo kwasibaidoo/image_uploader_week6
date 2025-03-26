@@ -17,8 +17,7 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRespon
 
 @Configuration
 public class DatabaseConfig {
-    
-    String secretARN = "rds!db-027f803e-1fa4-4c76-b968-17db311d0e32";
+    String secretARN = "weeksixproject/database/credentials";
     // String secretARN = "weeksixproject/database/credentials";
 
     @Profile("prod")
@@ -34,20 +33,37 @@ public class DatabaseConfig {
             throw e;
         }
         
-        String host = "week6lab-postgresqldatabase-fdmlfhsu9exd.cjyeckoc8ro1.eu-west-1.rds.amazonaws.com";
-        String port = "5432";
-        String dbname = "imagesdb";
         String secret = getSecretValueResponse.secretString();
         JSONObject secretJson = new JSONObject(secret);
+        String host = secretJson.getString("host");
+        String port = secretJson.getString("port");
+        String dbname = secretJson.getString("dbname");
         String username = secretJson.getString("username");
         String password = secretJson.getString("password");
+
+        // Get actual password
+        SecretsManagerClient secretsManagerClienttwo = SecretsManagerClient.builder().region(Region.of("eu-west-1")).build();
+        GetSecretValueRequest getSecretValueRequesttwo = GetSecretValueRequest.builder().secretId(password).build();
+        GetSecretValueResponse getSecretValueResponsetwo;
+
+        try {
+            getSecretValueResponsetwo = secretsManagerClienttwo.getSecretValue(getSecretValueRequesttwo);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        String rdsSecret = getSecretValueResponsetwo.secretString();
+        JSONObject rdJsonObject = new JSONObject(rdsSecret);
+        String actualpassword = rdJsonObject.getString("password");
+
+
         
         String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", host, port, dbname);
 
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl(jdbcUrl);
         hikariConfig.setUsername(username);
-        hikariConfig.setPassword(password);
+        hikariConfig.setPassword(actualpassword);
 
         hikariConfig.setConnectionTimeout(60000);  // 30 seconds
         hikariConfig.setValidationTimeout(60000);   // 5 seconds
