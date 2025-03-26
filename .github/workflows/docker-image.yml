@@ -8,7 +8,7 @@ on:
 
 env:
   APP_ENVIRONMENT: weeksixproject
-  AWS_REGION: eu-west-1
+  AWS_REGION: us-east-1
   ECS_CLUSTER: weeksixproject-Cluster
   ECS_SERVICE: weeksixproject-service
   ECS_TASK_FAMILY: weeksixproject-task
