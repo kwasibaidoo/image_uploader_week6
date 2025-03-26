@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --from=build /workspace/app/target/*.jar app.jar
 
 # Environment variables
-ENV AWS_REGION=us-east-1
+ENV AWS_REGION=eu-west-1
 ENV PORT=5000
 
 EXPOSE 5000
