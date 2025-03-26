@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRespon
 
 @Configuration
 public class DatabaseConfig {
-    String secretARN = "weeksixproject/database/credentials";
+    String secretARN = "weeksixprojectrds/database/credentials";
     // String secretARN = "weeksixproject/database/credentials";
 
     @Profile("prod")
