@@ -80,8 +80,8 @@ jobs:
           "memory": "512",
           "networkMode": "awsvpc",
           "requiresCompatibilities": ["FARGATE"],
-          "taskRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-1yEgFYBFsPX5",
-          "executionRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-1yEgFYBFsPX5",
+          "taskRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-skwsNUKQKO4w",
+          "executionRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-skwsNUKQKO4w",
           "containerDefinitions": [
             {
               "name": "${{ env.APP_ENVIRONMENT }}-container",
