@@ -8,7 +8,8 @@ on:
 
 env:
   APP_ENVIRONMENT: weeksixproject
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-west-1
+  ECR_REGION: us-east-1
   ECS_CLUSTER: weeksixproject-Cluster
   ECS_SERVICE: weeksixproject-service
   ECS_TASK_FAMILY: weeksixproject-task
@@ -39,7 +40,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+        aws-region: ${{ env.ECR_REGION }}
         
     - name: Login to Amazon ECR
       id: login-ecr
@@ -58,6 +59,13 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+
+    - name: Configure AWS credentials for ECS (eu-west-1)
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
     # - name: Generate task definition JSON
     #   run: |
