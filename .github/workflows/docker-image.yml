@@ -65,7 +65,11 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+        aws-region: eu-west-1
+
+    - name: Set ECR Region environment
+      run: |
+        echo "AWS_DEFAULT_REGION=eu-west-1" >> $GITHUB_ENV
 
     - name: Generate task definition JSON
       run: |
@@ -94,13 +98,13 @@ jobs:
                 "logDriver": "awslogs",
                 "options": {
                   "awslogs-group": "/ecs/${{ env.APP_ENVIRONMENT }}",
-                  "awslogs-region": "${{ env.AWS_REGION }}",
+                  "awslogs-region": "eu-west-1",
                   "awslogs-stream-prefix": "ecs"
                 }
               },
               "environment": [
                 {"name": "S3_BUCKET_NAME", "value": "${{ env.APP_ENVIRONMENT }}-images-${{ secrets.AWS_ACCOUNT_ID }}"},
-                {"name": "AWS_REGION", "value": "${{ env.AWS_REGION }}"},
+                {"name": "AWS_REGION", "value": "eu-west-1"},
                 {"name": "SPRING_ACTIVE_PROFILE", "value": "prod"}
               ],
               "healthCheck": {
@@ -117,7 +121,7 @@ jobs:
 
     - name: Register new task definition
       run: |
-        TASK_DEFINITION_ARN=$(aws ecs register-task-definition --cli-input-json file://task-definition.json --region ${{ env.AWS_REGION }} --query 'taskDefinition.taskDefinitionArn' --output text)
+        TASK_DEFINITION_ARN=$(aws ecs register-task-definition --cli-input-json file://task-definition.json --region eu-west-1 --query 'taskDefinition.taskDefinitionArn' --output text)
         echo "Task Definition ARN: $TASK_DEFINITION_ARN"
         echo "task_definition_arn=$TASK_DEFINITION_ARN" >> $GITHUB_ENV
 
