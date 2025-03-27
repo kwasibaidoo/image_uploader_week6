@@ -161,7 +161,7 @@ jobs:
           --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
           --description "Deployment triggered by GitHub Actions" \
           --revision "{\"revisionType\":\"AppSpecContent\",\"appSpecContent\":{\"content\":\"$ESCAPED_APPSPEC_CONTENT\"}}" \
-          --region "${{ env.AWS_REGION }}" \
+          --region eu-west-1 \
           --query 'deploymentId' --output text)
         
         echo "Deployment ID: $DEPLOYMENT_ID"
@@ -169,4 +169,4 @@ jobs:
         # Wait for the deployment to complete
         aws deploy wait deployment-successful \
           --deployment-id "$DEPLOYMENT_ID" \
-          --region "${{ env.AWS_REGION }}"
+          --region eu-west-1
