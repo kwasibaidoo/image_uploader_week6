@@ -8,8 +8,8 @@ on:
 
 env:
   APP_ENVIRONMENT: weeksixproject
-  AWS_REGION: eu-west-1
-  ECR_REGION: us-east-1
+  AWS_REGION: eu-west-1  # Your ECS and CodeDeploy region
+  ECR_REGION: us-east-1  # ECR Public region
   ECS_CLUSTER: weeksixproject-Cluster
   ECS_SERVICE: weeksixproject-service
   ECS_TASK_FAMILY: weeksixproject-task
@@ -35,7 +35,7 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
       
-    - name: Configure AWS credentials
+    - name: Configure AWS credentials for ECR (us-east-1)
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -60,7 +60,7 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
-    - name: Configure AWS credentials for ECS (eu-west-1)
+    - name: Configure AWS credentials for ECS/CodeDeploy (eu-west-1)
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -69,7 +69,6 @@ jobs:
 
     - name: Generate task definition JSON
       run: |
-        # Create a task definition JSON file with the new image
         cat <<EOF > task-definition.json
         {
           "family": "${{ env.ECS_TASK_FAMILY }}",
@@ -77,8 +76,8 @@ jobs:
           "memory": "512",
           "networkMode": "awsvpc",
           "requiresCompatibilities": ["FARGATE"],
-          "taskRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-skwsNUKQKO4w",
-          "executionRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-skwsNUKQKO4w",
+          "taskRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-1yEgFYBFsPX5",
+          "executionRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-1yEgFYBFsPX5",
           "containerDefinitions": [
             {
               "name": "${{ env.APP_ENVIRONMENT }}-container",
@@ -118,14 +117,12 @@ jobs:
 
     - name: Register new task definition
       run: |
-        # Register the new task definition and capture the revision number
         TASK_DEFINITION_ARN=$(aws ecs register-task-definition --cli-input-json file://task-definition.json --region ${{ env.AWS_REGION }} --query 'taskDefinition.taskDefinitionArn' --output text)
         echo "Task Definition ARN: $TASK_DEFINITION_ARN"
         echo "task_definition_arn=$TASK_DEFINITION_ARN" >> $GITHUB_ENV
 
     - name: Generate appspec.json for CodeDeploy
       run: |
-        # Create an appspec.json file for CodeDeploy
         cat <<EOF > appspec.json
         {
           "version": 0.0,
@@ -155,19 +152,21 @@ jobs:
         APPSPEC_CONTENT=$(cat appspec.json | jq -c -r @json)
         
         # Escape any inner quotes so that it's valid JSON for AWS
-        ESCAPED_APPSPEC_CONTENT=$(echo $APPSPEC_CONTENT | sed 's/"/\\"/g')
+        ESCAPED_APPSPEC_CONTENT=$(echo "$APPSPEC_CONTENT" | sed 's/"/\\"/g')
         
         # Create a deployment with the appspec content as a string
         DEPLOYMENT_ID=$(aws deploy create-deployment \
-          --application-name ${{ env.CODEDEPLOY_APPLICATION }} \
-          --deployment-group-name ${{ env.CODEDEPLOY_DEPLOYMENT_GROUP }} \
+          --application-name "${{ env.CODEDEPLOY_APPLICATION }}" \
+          --deployment-group-name "${{ env.CODEDEPLOY_DEPLOYMENT_GROUP }}" \
           --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
           --description "Deployment triggered by GitHub Actions" \
           --revision "{\"revisionType\":\"AppSpecContent\",\"appSpecContent\":{\"content\":\"$ESCAPED_APPSPEC_CONTENT\"}}" \
-          --region ${{ env.AWS_REGION }} \
+          --region "${{ env.AWS_REGION }}" \
           --query 'deploymentId' --output text)
         
         echo "Deployment ID: $DEPLOYMENT_ID"
         
         # Wait for the deployment to complete
-        aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --region ${{ env.AWS_REGION }}
+        aws deploy wait deployment-successful \
+          --deployment-id "$DEPLOYMENT_ID" \
+          --region "${{ env.AWS_REGION }}"
