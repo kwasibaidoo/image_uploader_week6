@@ -2,14 +2,14 @@ name: CI/CD Pipeline for Blue-Green Deployment
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 env:
   APP_ENVIRONMENT: weeksixproject
-  AWS_REGION: eu-central-1
-  ECR_REGION: us-east-1
+  AWS_REGION: eu-central-1  # Your ECS and CodeDeploy region
+  ECR_REGION: us-east-1  # ECR Public region
   ECS_CLUSTER: weeksixproject-Cluster
   ECS_SERVICE: weeksixproject-service
   ECS_TASK_FAMILY: weeksixproject-task
@@ -20,56 +20,59 @@ jobs:
   build-and-push:
     name: Build and Push to ECR
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+      
+    - name: Configure AWS credentials for ECR (us-east-1)
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.ECR_REGION }}
+        
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+      with:
+        registry-type: public
+        
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: public.ecr.aws/o0m1t6s5
+        ECR_REPOSITORY: image-uploader-app
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          cache: maven
+    # - name: Configure AWS credentials for ECS/CodeDeploy (eu-central-1)
+    #   uses: aws-actions/configure-aws-credentials@v4
+    #   with:
+    #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     aws-region: eu-central-1
 
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.ECR_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: public
-
-      - name: Build, tag, and push image to Amazon ECR
-        env:
-          ECR_REGISTRY: public.ecr.aws/o0m1t6s5
-          ECR_REPOSITORY: image-uploader-app
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
-
-      - name: Configure AWS credentials for ECS (eu-central-1)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+    # - name: Set ECR Region environment
+    #   run: |
+    #     echo "AWS_DEFAULT_REGION=eu-central-1" >> $GITHUB_ENV
 
     # - name: Generate task definition JSON
     #   run: |
-    #     # Create a task definition JSON file with the new image
     #     cat <<EOF > task-definition.json
     #     {
     #       "family": "${{ env.ECS_TASK_FAMILY }}",
@@ -77,8 +80,8 @@ jobs:
     #       "memory": "512",
     #       "networkMode": "awsvpc",
     #       "requiresCompatibilities": ["FARGATE"],
-    #       "taskRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-1yEgFYBFsPX5",
-    #       "executionRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-1yEgFYBFsPX5",
+    #       "taskRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-skwsNUKQKO4w",
+    #       "executionRoleArn": "arn:aws:iam::888577022995:role/week6lab-ECSTaskExecutionRole-skwsNUKQKO4w",
     #       "containerDefinitions": [
     #         {
     #           "name": "${{ env.APP_ENVIRONMENT }}-container",
@@ -95,13 +98,13 @@ jobs:
     #             "logDriver": "awslogs",
     #             "options": {
     #               "awslogs-group": "/ecs/${{ env.APP_ENVIRONMENT }}",
-    #               "awslogs-region": "${{ env.AWS_REGION }}",
+    #               "awslogs-region": "eu-central-1",
     #               "awslogs-stream-prefix": "ecs"
     #             }
     #           },
     #           "environment": [
     #             {"name": "S3_BUCKET_NAME", "value": "${{ env.APP_ENVIRONMENT }}-images-${{ secrets.AWS_ACCOUNT_ID }}"},
-    #             {"name": "AWS_REGION", "value": "${{ env.AWS_REGION }}"},
+    #             {"name": "AWS_REGION", "value": "eu-central-1"},
     #             {"name": "SPRING_ACTIVE_PROFILE", "value": "prod"}
     #           ],
     #           "healthCheck": {
@@ -118,14 +121,12 @@ jobs:
 
     # - name: Register new task definition
     #   run: |
-    #     # Register the new task definition and capture the revision number
-    #     TASK_DEFINITION_ARN=$(aws ecs register-task-definition --cli-input-json file://task-definition.json --region ${{ env.AWS_REGION }} --query 'taskDefinition.taskDefinitionArn' --output text)
+    #     TASK_DEFINITION_ARN=$(aws ecs register-task-definition --cli-input-json file://task-definition.json --region eu-central-1 --query 'taskDefinition.taskDefinitionArn' --output text)
     #     echo "Task Definition ARN: $TASK_DEFINITION_ARN"
     #     echo "task_definition_arn=$TASK_DEFINITION_ARN" >> $GITHUB_ENV
 
     # - name: Generate appspec.json for CodeDeploy
     #   run: |
-    #     # Create an appspec.json file for CodeDeploy
     #     cat <<EOF > appspec.json
     #     {
     #       "version": 0.0,
@@ -153,21 +154,23 @@ jobs:
     #   run: |
     #     # Read appspec.json and escape the content properly
     #     APPSPEC_CONTENT=$(cat appspec.json | jq -c -r @json)
-
+        
     #     # Escape any inner quotes so that it's valid JSON for AWS
-    #     ESCAPED_APPSPEC_CONTENT=$(echo $APPSPEC_CONTENT | sed 's/"/\\"/g')
-
+    #     ESCAPED_APPSPEC_CONTENT=$(echo "$APPSPEC_CONTENT" | sed 's/"/\\"/g')
+        
     #     # Create a deployment with the appspec content as a string
     #     DEPLOYMENT_ID=$(aws deploy create-deployment \
-    #       --application-name ${{ env.CODEDEPLOY_APPLICATION }} \
-    #       --deployment-group-name ${{ env.CODEDEPLOY_DEPLOYMENT_GROUP }} \
+    #       --application-name "${{ env.CODEDEPLOY_APPLICATION }}" \
+    #       --deployment-group-name "${{ env.CODEDEPLOY_DEPLOYMENT_GROUP }}" \
     #       --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
     #       --description "Deployment triggered by GitHub Actions" \
     #       --revision "{\"revisionType\":\"AppSpecContent\",\"appSpecContent\":{\"content\":\"$ESCAPED_APPSPEC_CONTENT\"}}" \
-    #       --region ${{ env.AWS_REGION }} \
+    #       --region eu-central-1 \
     #       --query 'deploymentId' --output text)
-
+        
     #     echo "Deployment ID: $DEPLOYMENT_ID"
-
+        
     #     # Wait for the deployment to complete
-    #     aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --region ${{ env.AWS_REGION }}
+    #     aws deploy wait deployment-successful \
+    #       --deployment-id "$DEPLOYMENT_ID" \
+    #       --region eu-central-1
