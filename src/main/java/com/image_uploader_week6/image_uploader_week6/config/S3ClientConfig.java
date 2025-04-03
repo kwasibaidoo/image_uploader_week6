@@ -11,22 +11,22 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
 public class S3ClientConfig {
-    @Value("${spring.cloud.aws.region.static:eu-west-1}")
+    @Value("${spring.cloud.aws.region.static:eu-central-1}")
     private String awsRegion;
-    
+
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()
-                        .region(Region.of(awsRegion))
-                        .credentialsProvider(DefaultCredentialsProvider.create())
-                        .build();
+                .region(Region.of(awsRegion))
+                .credentialsProvider(DefaultCredentialsProvider.create())
+                .build();
     }
 
     @Bean
     public S3Presigner s3Presigner() {
         return S3Presigner.builder()
-                            .region(Region.of(awsRegion))
-                            .credentialsProvider(DefaultCredentialsProvider.create())
-                            .build();
+                .region(Region.of(awsRegion))
+                .credentialsProvider(DefaultCredentialsProvider.create())
+                .build();
     }
 }

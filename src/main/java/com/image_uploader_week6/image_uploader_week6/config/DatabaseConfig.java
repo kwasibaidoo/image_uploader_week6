@@ -23,7 +23,8 @@ public class DatabaseConfig {
     @Profile("prod")
     @Bean
     public DataSource dataSource() throws Exception {
-        SecretsManagerClient secretsManagerClient = SecretsManagerClient.builder().region(Region.of("eu-west-1")).build();
+        SecretsManagerClient secretsManagerClient = SecretsManagerClient.builder().region(Region.of("eu-central-1"))
+                .build();
         GetSecretValueRequest getSecretValueRequest = GetSecretValueRequest.builder().secretId(secretARN).build();
         GetSecretValueResponse getSecretValueResponse;
 
@@ -32,7 +33,7 @@ public class DatabaseConfig {
         } catch (Exception e) {
             throw e;
         }
-        
+
         String secret = getSecretValueResponse.secretString();
         JSONObject secretJson = new JSONObject(secret);
         String host = secretJson.getString("host");
@@ -41,8 +42,6 @@ public class DatabaseConfig {
         String username = secretJson.getString("username");
         String password = secretJson.getString("password");
 
-
-        
         String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", host, port, dbname);
 
         HikariConfig hikariConfig = new HikariConfig();
@@ -50,10 +49,10 @@ public class DatabaseConfig {
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
 
-        hikariConfig.setConnectionTimeout(60000);  // 30 seconds
-        hikariConfig.setValidationTimeout(60000);   // 5 seconds
-        hikariConfig.setIdleTimeout(60000);        // 30 seconds
-        hikariConfig.setMaxLifetime(2000000);      // About 33 minutes
+        hikariConfig.setConnectionTimeout(60000); // 30 seconds
+        hikariConfig.setValidationTimeout(60000); // 5 seconds
+        hikariConfig.setIdleTimeout(60000); // 30 seconds
+        hikariConfig.setMaxLifetime(2000000); // About 33 minutes
         hikariConfig.setMaximumPoolSize(10);
         hikariConfig.setMinimumIdle(5);
         hikariConfig.setConnectionTestQuery("SELECT 1");
